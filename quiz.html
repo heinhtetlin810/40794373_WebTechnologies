@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoQuester</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/features.css" />
+  <style>
+    .quiz-page { padding: 32px 0 72px; }
+
+    
+    #startPanel {
+      display: none;          
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+    }
+
+    .start-card {
+      width: 100%; max-width: 500px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      position: relative; overflow: hidden;
+    }
+    .start-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .start-cat-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+    .start-title {
+      font-family: 'Cinzel', serif; font-size: 1.7rem; font-weight: 700;
+      margin-bottom: 8px; color: var(--gold);
+    }
+    .start-desc {
+      font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px;
+    }
+    .start-player {
+      font-size: 0.8rem; color: var(--text-muted); margin-bottom: 28px;
+      padding: 8px 16px; background: var(--surface2);
+      border-radius: 99px; display: inline-block;
+    }
+
+    .form-label {
+      display: block; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 10px; text-align: left;
+    }
+
+    /*Difficulty cards*/
+    .diff-group { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 28px; }
+    .diff-item { position: relative; }
+    .diff-option { position: absolute; opacity: 0; width: 0; height: 0; }
+
+    .diff-label {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      padding: 16px 10px; border-radius: var(--radius);
+      border: 1.5px solid var(--border); cursor: pointer;
+      transition: all var(--transition); text-align: center;
+      background: var(--surface2); user-select: none;
+    }
+    .diff-label:hover {
+      border-color: var(--text-muted);
+      background: var(--surface3);
+      transform: translateY(-1px);
+    }
+    .diff-item input:checked + label {
+      border-color: var(--gold);
+      background: rgba(240,160,0,0.09);
+      box-shadow: 0 0 0 1px var(--gold);
+    }
+    .diff-item input:checked + label .diff-name { color: var(--gold); }
+
+    .diff-icon { font-size: 1.4rem; }
+    .diff-name { font-weight: 700; font-size: 0.85rem; }
+    .diff-desc { font-size: 0.69rem; color: var(--text-muted); line-height: 1.35; }
+
+    /*Score multiplier row*/
+    .mult-row {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 24px;
+    }
+    .mult-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 6px; text-align: center;
+    }
+    .mult-box strong { display: block; font-size: 0.88rem; color: var(--text); margin-bottom: 2px; }
+    .mult-box span   { font-size: 0.69rem; color: var(--text-muted); }
+
+    /*QUIZ PANEL*/
+    #quizPanel { display: none; }
+
+    .quiz-inner { max-width: 680px; margin: 0 auto; }
+
+    .quiz-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .topbar-left  { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .cat-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 99px; padding: 5px 14px;
+      font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
+    }
+    #qNumTxt { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--text-muted); }
+
+    .score-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 99px; padding: 5px 16px;
+      font-family: 'Cinzel', serif; font-size: 0.9rem;
+    }
+    .score-pill .lbl {
+      font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em; font-family: 'Nunito', sans-serif;
+    }
+    #scoreTxt { color: var(--gold); font-weight: 700; }
+    #quizPlayerName { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+
+    .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+    .progress-row .progress-track { flex: 1; }
+    #progressTxt { font-size: 0.72rem; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+
+    .q-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 30px;
+      box-shadow: var(--shadow); position: relative; overflow: hidden;
+    }
+    .q-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.5;
+    }
+
+    #questionText {
+      font-size: 1.15rem; font-weight: 600; line-height: 1.55; margin-bottom: 22px;
+    }
+
+    #flagWrap { text-align: center; margin-bottom: 22px; }
+    #flagImg {
+      max-width: 240px; width: 100%; border-radius: 8px;
+      border: 2px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    #shapeWrap {
+      display: none; flex-direction: column; align-items: center;
+      margin-bottom: 22px; position: relative;
+    }
+    #shapeCanvas {
+      width: 100%; max-width: 300px; height: 210px;
+      border-radius: 12px; background: var(--surface2); border: 1px solid var(--border);
+    }
+    #shapeFallbackImg {
+      display: none; max-width: 200px; max-height: 170px; border-radius: 8px;
+      filter: brightness(0) invert(0.5) sepia(1) saturate(3) hue-rotate(140deg);
+    }
+    #shapeSpinner {
+      position: absolute; inset: 0;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(12,26,53,0.75); border-radius: 12px;
+    }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid var(--border);
+      border-top-color: var(--teal); border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #shapeError {
+      display: none; align-items: center; justify-content: center;
+      padding: 20px; color: var(--text-muted); font-size: 0.8rem;
+    }
+
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .option-btn {
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 600;
+      padding: 15px 16px; text-align: left; cursor: pointer;
+      transition: all var(--transition); line-height: 1.3;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--gold); background: var(--surface3);
+      transform: translateY(-2px); box-shadow: 0 5px 16px rgba(0,0,0,0.3);
+    }
+    .option-btn:disabled { cursor: default; }
+    .option-btn.option--correct {
+      background: rgba(41,224,124,0.1) !important;
+      border-color: var(--green) !important;
+      color: var(--green); animation: pop 0.3s ease;
+    }
+    .option-btn.option--wrong {
+      background: rgba(255,78,106,0.1) !important;
+      border-color: var(--red) !important;
+      color: var(--red); animation: shake 0.4s ease;
+    }
+
+    .feedback {
+      display: flex; flex-direction: column; gap: 5px;
+      padding: 14px 18px; border-radius: var(--radius);
+      margin-top: 16px; border: 1px solid; font-size: 0.9rem;
+    }
+    .feedback--correct { background: rgba(41,224,124,0.08); border-color: rgba(41,224,124,0.3); color: var(--green); }
+    .feedback--wrong   { background: rgba(255,78,106,0.08); border-color: rgba(255,78,106,0.3); color: var(--red); }
+    #feedbackFact { font-size: 0.75rem; color: var(--text-muted); }
+
+    #nextBtn { width: 100%; margin-top: 16px; }
+
+    /*RESULT PANEL*/
+    #resultPanel { display: none; }
+
+    .result-card {
+      max-width: 520px; margin: 0 auto;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 44px 36px;
+      text-align: center; box-shadow: var(--shadow); position: relative; overflow: hidden;
+    }
+    .result-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--gold), var(--teal));
+    }
+
+    #medalEmoji { font-size: 4rem; display: block; margin-bottom: 12px; animation: pop 0.6s 0.2s ease both; }
+    #resultMsg  { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+    .result-sub {
+      color: var(--text-muted); font-size: 0.82rem; margin-bottom: 30px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .result-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 28px; }
+    .stat-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 10px;
+    }
+    .stat-val { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 700; }
+    .stat-lbl { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+
+    .result-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .result-actions .btn { flex: 1; min-width: 120px; max-width: 180px; }
+
+    /*Try other categories*/
+    .other-cats {
+      margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border);
+    }
+    .other-cats p {
+      font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 12px; font-weight: 700;
+    }
+    .other-cats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+    .other-cat-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 12px 8px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); cursor: pointer; transition: all var(--transition);
+      text-decoration: none; color: var(--text-muted); font-size: 0.72rem; font-weight: 700;
+    }
+    .other-cat-btn:hover { border-color: var(--gold); color: var(--text); background: var(--surface3); }
+    .other-cat-btn .icon { font-size: 1.3rem; }
+
+    /*Responsive*/
+    @media (max-width: 540px) {
+      .options-grid { grid-template-columns: 1fr; }
+      .result-stats { grid-template-columns: 1fr 1fr; }
+      .other-cats-grid { grid-template-columns: repeat(2,1fr); }
+      .quiz-topbar { gap: 6px; }
+      #quizPlayerName { display: none; }
+      .q-card { padding: 20px 16px; }
+      .start-card { padding: 28px 18px; }
+      .diff-group { grid-template-columns: 1fr; }
+      .diff-label { flex-direction: row; text-align: left; padding: 12px 14px; gap: 10px; }
+      .mult-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav__logo">🌍 GeoQuester</a>
+    <div class="nav__links">
+      <a href="index.html"                       class="nav__link"><span class="icon">🏠</span>Home</a>
+      <a href="quiz.html?cat=capitals"   data-cat="capitals"   class="nav__link"><span class="icon">🌆</span>Capitals</a>
+      <a href="quiz.html?cat=flags"      data-cat="flags"      class="nav__link"><span class="icon">🚩</span>Flags</a>
+      <a href="quiz.html?cat=continents" data-cat="continents" class="nav__link"><span class="icon">🌍</span>Continents</a>
+      <a href="quiz.html?cat=shapes"     data-cat="shapes"     class="nav__link"><span class="icon">🗺️</span>Map Shapes</a>
+      <a href="leaderboard.html"                 class="nav__link"><span class="icon">🏆</span>Leaderboard</a>
+    </div>
+  </nav>
+
+  <main class="container quiz-page">
+
+    <!--START PANEL — difficulty selection-->
+    <div id="startPanel">
+      <div class="start-card anim-fadeUp">
+        <span id="startIcon" class="start-cat-icon">🌆</span>
+        <h1 id="startTitle" class="start-title">Capital Cities</h1>
+        <p  id="startDesc"  class="start-desc">Name the capital city of the country.</p>
+        <p class="start-player">👤 Playing as <strong id="startPlayer">GeoQuester</strong></p>
+
+        <label class="form-label">Select Difficulty</label>
+        <div class="diff-group">
+          <div class="diff-item">
+            <input class="diff-option" type="radio" name="difficulty" id="d-easy" value="easy" checked />
+            <label class="diff-label" for="d-easy">
+              <span class="diff-icon">👶</span>
+              <span class="diff-name">Easy Peasy</span>
+              <span class="diff-desc">Famous countries</span>
+            </label>
+          </div>
+          <div class="diff-item">
+            <input class="diff-option" type="radio" name="difficulty" id="d-medium" value="medium" />
+            <label class="diff-label" for="d-medium">
+              <span class="diff-icon">🤔</span>
+              <span class="diff-name">Intermediate</span>
+              <span class="diff-desc">Challenging Countries</span>
+            </label>
+          </div>
+          <div class="diff-item">
+            <input class="diff-option" type="radio" name="difficulty" id="d-hard" value="hard" />
+            <label class="diff-label" for="d-hard">
+              <span class="diff-icon">😬</span>
+              <span class="diff-name">Oh No!</span>
+              <span class="diff-desc">Impossible to beat</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Score multiplier -->
+        <div class="mult-row">
+          <div class="mult-box"><strong>Easy ×1.0</strong><span>20 countries</span></div>
+          <div class="mult-box"><strong>Medium ×1.5</strong><span>43 countries</span></div>
+          <div class="mult-box"><strong>Hard ×2.0</strong><span>48 countries</span></div>
+        </div>
+
+        <button id="startBtn" class="btn btn--primary btn--lg btn--full">Start Quiz →</button>
+        <a href="index.html" class="btn btn--ghost btn--full" style="margin-top:10px;">← Back to Categories</a>
+      </div>
+    </div>
+
+    <!--QUIZ PANEL-->
+    <div id="quizPanel">
+      <div class="quiz-inner">
+
+        <!-- Topbar -->
+        <div class="quiz-topbar">
+          <div class="topbar-left">
+            <div class="cat-pill">
+              <span id="quizCatIcon">🌆</span>
+              <span id="quizCatLabel">Capitals</span>
+            </div>
+            <span id="qNumTxt">Q1</span>
+            <span id="diffBadge" class="badge badge--easy">Easy</span>
+          </div>
+          <div class="topbar-right">
+            <span id="quizPlayerName"></span>
+            <div class="score-pill">
+              <span class="lbl">Score</span>
+              <span id="scoreTxt">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-row">
+          <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+          <span id="progressTxt">1 / 10</span>
+        </div>
+
+        <div class="q-card">
+
+          <div id="flagWrap" style="display:none;">
+            <img id="flagImg" src="" alt="Country flag" />
+          </div>
+
+          <div id="shapeWrap">
+            <canvas id="shapeCanvas"></canvas>
+            <img id="shapeFallbackImg" src="" alt="Country shape" />
+            <div id="shapeSpinner"><div class="spinner"></div></div>
+            <div id="shapeError">⚠️ Shape unavailable</div>
+          </div>
+
+          <p id="questionText" class="anim-fadeUp">Loading…</p>
+
+          <div id="optionsGrid" class="options-grid"></div>
+
+          <div id="feedback" class="feedback" style="display:none;">
+            <span id="feedbackMain"></span>
+            <span id="feedbackFact"></span>
+          </div>
+
+          <button id="nextBtn" class="btn btn--primary" style="display:none;">
+            Next Question →
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RESULT PANEL -->
+    <div id="resultPanel">
+      <div class="result-card">
+        <span id="medalEmoji">🏆</span>
+        <p id="resultMsg">Excellent!</p>
+        <div class="result-sub">
+          <span id="resultCatIcon">🌆</span>
+          <span id="resultCatLabel">Capitals</span>
+          <span>·</span>
+          <span id="resultDiffBadge" class="badge badge--easy">Easy</span>
+        </div>
+
+        <div class="result-stats">
+          <div class="stat-box">
+            <div id="finalScore" class="stat-val text-gold">0</div>
+            <div class="stat-lbl">Score</div>
+          </div>
+          <div class="stat-box">
+            <div id="finalCorrect" class="stat-val" style="color:var(--green);">-</div>
+            <div class="stat-lbl">Correct</div>
+          </div>
+          <div class="stat-box">
+            <div id="finalPct" class="stat-val" style="color:var(--teal);">-</div>
+            <div class="stat-lbl">Accuracy</div>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button id="playAgainBtn" class="btn btn--primary">🔄 Play Again</button>
+          <a href="leaderboard.html" class="btn btn--outline">🏆 Scores</a>
+          <a href="index.html"       class="btn btn--secondary">🏠 Home</a>
+        </div>
+
+        <!-- Try other categories -->
+        <div class="other-cats">
+          <p>Try another category</p>
+          <div class="other-cats-grid">
+            <a href="quiz.html?cat=capitals"   class="other-cat-btn"><span class="icon">🌆</span>Capitals</a>
+            <a href="quiz.html?cat=flags"      class="other-cat-btn"><span class="icon">🚩</span>Flags</a>
+            <a href="quiz.html?cat=continents" class="other-cat-btn"><span class="icon">🌍</span>Continents</a>
+            <a href="quiz.html?cat=shapes"     class="other-cat-btn"><span class="icon">🗺️</span>Shapes</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- TopoJSON (for shape rendering) -->
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/quiz-engine.js"></script>
+  <script src="js/theme.js"></script>
+<script src="js/features.js"></script>
+</body>
+</html>

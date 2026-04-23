@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoQuester — Home</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/features.css" />
+  <style>
+    .home-wrap { padding: 52px 0 80px; }
+
+    .hero { text-align: center; margin-bottom: 52px; }
+
+    .hero__globe {
+      font-size: 4rem; display: block; margin-bottom: 16px;
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    .hero__eyebrow {
+      font-family: 'Cinzel', serif; font-size: 0.68rem;
+      letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase;
+      margin-bottom: 10px; opacity: 0;
+      animation: fadeUp 0.5s 0.1s ease forwards;
+    }
+
+    .hero__title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2.6rem, 7vw, 4.2rem);
+      font-weight: 900; line-height: 1.05; letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffd980, var(--gold), #d07000);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      opacity: 0; animation: fadeUp 0.5s 0.2s ease forwards;
+    }
+
+    .hero__sub {
+      font-size: 1rem; color: var(--text-muted); line-height: 1.7;
+      max-width: 480px; margin: 0 auto;
+      opacity: 0; animation: fadeUp 0.5s 0.3s ease forwards;
+    }
+
+    .name-row {
+      display: flex; align-items: center; gap: 12px;
+      max-width: 400px; margin: 0 auto 52px;
+      opacity: 0; animation: fadeUp 0.5s 0.4s ease forwards;
+    }
+    .name-row .input { flex: 1; }
+    .name-row .name-badge {
+      display: flex; align-items: center; gap: 6px;
+      padding: 11px 16px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-size: 0.85rem; font-weight: 700; color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /*Category section heading*/
+    .section-heading {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 18px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-heading::before, .section-heading::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /*Category grid*/
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 52px;
+    }
+
+    .cat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex; flex-direction: column; gap: 12px;
+      position: relative; overflow: hidden;
+    }
+
+    .cat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      opacity: 0; transition: opacity 0.3s;
+    }
+
+    .cat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      border-color: var(--card-color, var(--gold));
+      color: var(--text);
+    }
+    .cat-card:hover::before { opacity: 1; }
+
+    .cat-card--capitals  { --card-color: var(--teal); }
+    .cat-card--capitals::before  { background: linear-gradient(90deg, transparent, var(--teal), transparent); }
+    .cat-card--flags     { --card-color: var(--gold); }
+    .cat-card--flags::before     { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+    .cat-card--continents{ --card-color: var(--purple); }
+    .cat-card--continents::before{ background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+    .cat-card--shapes    { --card-color: var(--red); }
+    .cat-card--shapes::before    { background: linear-gradient(90deg, transparent, var(--red), transparent); }
+
+    .cat-icon {
+      font-size: 2.2rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 56px; height: 56px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.3s ease;
+    }
+    .cat-card:hover .cat-icon {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--card-color, var(--gold));
+      box-shadow: 0 0 16px rgba(255,255,255,0.08);
+    }
+
+    .cat-title {
+      font-family: 'Cinzel', serif; font-size: 1.05rem; font-weight: 700;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .cat-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+
+    .cat-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 4px;
+    }
+    .cat-count { font-size: 0.72rem; color: var(--text-dim); font-weight: 600; }
+    .cat-arrow {
+      font-size: 0.85rem; color: var(--text-dim);
+      transition: transform 0.25s, color 0.25s;
+    }
+    .cat-card:hover .cat-arrow { transform: translateX(4px); color: var(--card-color, var(--gold)); }
+
+    /*Leaderboard teaser*/
+    .lb-teaser {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .lb-teaser__left { display: flex; align-items: center; gap: 14px; }
+    .lb-teaser__icon { font-size: 1.8rem; }
+    .lb-teaser__title { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 700; }
+    .lb-teaser__sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+    /*Stagger animations*/
+    .cat-card { opacity: 0; animation: fadeUp 0.5s ease forwards; }
+    .cat-card:nth-child(1) { animation-delay: 0.45s; }
+    .cat-card:nth-child(2) { animation-delay: 0.55s; }
+    .cat-card:nth-child(3) { animation-delay: 0.65s; }
+    .cat-card:nth-child(4) { animation-delay: 0.75s; }
+    .lb-teaser { opacity: 0; animation: fadeUp 0.5s 0.9s ease forwards; }
+
+    @media (max-width: 540px) {
+      .cat-grid { grid-template-columns: 1fr; gap: 12px; }
+      .name-row { flex-direction: column; }
+      .lb-teaser { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav__logo">🌍 GeoQuester</a>
+    <div class="nav__links">
+      <a href="index.html"           class="nav__link active"><span class="icon">🏠</span>Home</a>
+      <a href="quiz.html?cat=capitals"   class="nav__link"><span class="icon">🌆</span>Capitals</a>
+      <a href="quiz.html?cat=flags"      class="nav__link"><span class="icon">🚩</span>Flags</a>
+      <a href="quiz.html?cat=continents" class="nav__link"><span class="icon">🌍</span>Continents</a>
+      <a href="quiz.html?cat=shapes"     class="nav__link"><span class="icon">🗺️</span>Map Shapes</a>
+      <a href="leaderboard.html"         class="nav__link"><span class="icon">🏆</span>Leaderboard</a>
+    </div>
+  </nav>
+
+  <main class="container home-wrap">
+
+    <div class="hero">
+      <span class="hero__globe">🌍</span>
+      <p class="hero__eyebrow">Test Your World Knowledge</p>
+      <h1 class="hero__title">GeoQuester</h1>
+      <p class="hero__sub">Dive into different categories to see how GEOQUESTER you are!</p>
+    </div>
+
+    <!-- Name input -->
+    <div class="name-row">
+      <input id="nameInput" class="input" type="text" placeholder="Enter your name…" maxlength="24" autocomplete="off" />
+      <div class="name-badge">👤 GeoQuester</div>
+    </div>
+
+    <!-- Categories -->
+    <p class="section-heading">Choose a Category</p>
+
+    <div class="cat-grid">
+      <!-- Capitals -->
+      <a href="quiz.html?cat=capitals" class="cat-card cat-card--capitals">
+        <div class="cat-icon">🌆</div>
+        <div>
+          <div class="cat-title">Capital Cities</div>
+          <div class="cat-desc">Name the capital city of countries from around the world.</div>
+        </div>
+        <div class="cat-footer">
+          <span class="cat-count">Over 50 countries</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Flags -->
+      <a href="quiz.html?cat=flags" class="cat-card cat-card--flags">
+        <div class="cat-icon">🚩</div>
+        <div>
+          <div class="cat-title">Flags</div>
+          <div class="cat-desc">Identify nations from their national flags.</div>
+        </div>
+        <div class="cat-footer">
+          <span class="cat-count">Over 50 countries</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Continents -->
+      <a href="quiz.html?cat=continents" class="cat-card cat-card--continents">
+        <div class="cat-icon">🌍</div>
+        <div>
+          <div class="cat-title">Continents</div>
+          <div class="cat-desc">Place countries on the correct continent across the globe.</div>
+        </div>
+        <div class="cat-footer">
+          <span class="cat-count">6 continents</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Map Shapes -->
+      <a href="quiz.html?cat=shapes" class="cat-card cat-card--shapes">
+        <div class="cat-icon">🗺️</div>
+        <div>
+          <div class="cat-title">Map Shapes</div>
+          <div class="cat-desc">Identify a country from its geographic outline.</div>
+        </div>
+        <div class="cat-footer">
+          <span class="cat-count">Over 50 countries</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Leaderboard teaser -->
+    <div class="lb-teaser">
+      <div class="lb-teaser__left">
+        <span class="lb-teaser__icon">🏆</span>
+        <div>
+          <div class="lb-teaser__title">Leaderboard</div>
+          <div class="lb-teaser__sub">See who's topped the board</div>
+        </div>
+      </div>
+      <a href="leaderboard.html" class="btn btn--outline btn--sm">View Scores Here →</a>
+    </div>
+
+  </main>
+
+  <script>
+    const nameInput = document.getElementById('nameInput');
+    nameInput.value = localStorage.getItem('gq_player') || '';
+
+    nameInput.addEventListener('input', () => {
+      localStorage.setItem('gq_player', nameInput.value.trim() || 'GeoQuester');
+    });
+
+    document.querySelectorAll('.cat-card').forEach(card => {
+      card.addEventListener('click', e => {
+        const name = nameInput.value.trim() || 'GeoQuester';
+        localStorage.setItem('gq_player', name);
+      });
+    });
+
+    document.querySelectorAll('.nav__link').forEach(link => {
+      link.addEventListener('click', () => {
+        const name = nameInput.value.trim() || 'GeoQuester';
+        localStorage.setItem('gq_player', name);
+      });
+    });
+  </script>
+  <script src="js/theme.js"></script>
+</body>
+</html>
